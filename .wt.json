@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "worktree": {
+    "basedir": "../",
+    "naming": "{repo}-{branch}",
+    "sanitize": {
+      "/": "-",
+      ":": "-"
+    }
+  },
+  "setup": {
+    "copy": [
+      ".env",
+      ".env.local"
+    ],
+    "link": [
+      "node_modules",
+      "vendor"
+    ]
+  }
+}

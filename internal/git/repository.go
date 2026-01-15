@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/wt/internal/util"
+	"github.com/superkoh/worktree-manager/internal/util"
 )
 
 // Repository represents a git repository

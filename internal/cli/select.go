@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/user/wt/internal/git"
-	"github.com/user/wt/internal/tui"
+	"github.com/superkoh/worktree-manager/internal/git"
+	"github.com/superkoh/worktree-manager/internal/tui"
 )
 
 var (

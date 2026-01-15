@@ -56,8 +56,8 @@ changelog:
 
 release:
   github:
-    owner: user
-    name: wt
+    owner: superkoh
+    name: worktree-manager
   draft: false
   prerelease: auto
   name_template: "v{{.Version}}"

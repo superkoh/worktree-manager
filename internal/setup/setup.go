@@ -3,7 +3,7 @@ package setup
 import (
 	"fmt"
 
-	"github.com/user/wt/internal/config"
+	"github.com/superkoh/worktree-manager/internal/config"
 )
 
 // RunSetup performs the copy and link operations for a new worktree

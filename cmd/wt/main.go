@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/user/wt/internal/cli"
+	"github.com/superkoh/worktree-manager/internal/cli"
 )
 
 // Set by goreleaser ldflags

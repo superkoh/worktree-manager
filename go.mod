@@ -1,4 +1,4 @@
-module github.com/user/wt
+module github.com/superkoh/worktree-manager
 
 go 1.25.5
 

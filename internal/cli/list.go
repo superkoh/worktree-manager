@@ -7,7 +7,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
-	"github.com/user/wt/internal/git"
+	"github.com/superkoh/worktree-manager/internal/git"
 )
 
 var (

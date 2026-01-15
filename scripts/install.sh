@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO="${REPO:-user/wt}"
+REPO="${REPO:-superkoh/worktree-manager}"
 BINARY_NAME="wt"
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 

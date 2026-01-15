@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/user/wt/internal/util"
+	"github.com/superkoh/worktree-manager/internal/util"
 )
 
 // Worktree represents a git worktree
