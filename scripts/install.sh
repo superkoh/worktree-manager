@@ -44,8 +44,6 @@ detect_arch() {
     case "$(uname -m)" in
         x86_64|amd64)  arch=amd64;;
         arm64|aarch64) arch=arm64;;
-        armv7l)        arch=arm;;
-        i386|i686)     arch=386;;
         *)
             echo -e "${RED}Unsupported architecture: $(uname -m)${NC}"
             exit 1

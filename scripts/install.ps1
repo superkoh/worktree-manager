@@ -62,7 +62,7 @@ function Get-Architecture {
         }
         return "amd64"
     }
-    return "386"
+    throw "Unsupported architecture: 32-bit Windows is not supported"
 }
 
 function Install-Wt {
