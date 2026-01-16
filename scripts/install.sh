@@ -77,15 +77,34 @@ setup_shell_integration() {
         *)      return;;
     esac
 
-    # Check if already configured
-    if grep -q "wt()" "$shell_rc" 2>/dev/null; then
-        echo -e "${YELLOW}Shell integration already configured.${NC}"
-        return
-    fi
+    local start_marker="# wt - Git Worktree Manager shell integration"
+    local end_marker="# wt - end"
 
     echo ""
-    echo -e "${BLUE}Setting up shell integration...${NC}"
 
+    # Remove existing integration if present (supports upgrade)
+    if grep -q "$start_marker" "$shell_rc" 2>/dev/null; then
+        if grep -q "$end_marker" "$shell_rc" 2>/dev/null; then
+            # Both markers present - safe to delete the range
+            sed -i.bak "/$start_marker/,/$end_marker/d" "$shell_rc"
+            rm -f "${shell_rc}.bak"
+            echo -e "${BLUE}Updating shell integration...${NC}"
+        else
+            # Start marker without end marker - legacy block, warn user
+            echo -e "${YELLOW}Warning: Found shell integration without end marker (legacy install).${NC}"
+            echo -e "${YELLOW}Please manually remove the wt() block from $shell_rc and re-run this script.${NC}"
+            return
+        fi
+    elif grep -q "wt()" "$shell_rc" 2>/dev/null; then
+        # Old format without markers - warn user
+        echo -e "${YELLOW}Warning: Found old wt() function without markers.${NC}"
+        echo -e "${YELLOW}Please manually remove it from $shell_rc and re-run this script.${NC}"
+        return
+    else
+        echo -e "${BLUE}Setting up shell integration...${NC}"
+    fi
+
+    # Add new integration with markers
     cat >> "$shell_rc" << 'EOF'
 
 # wt - Git Worktree Manager shell integration
@@ -104,6 +123,7 @@ wt() {
         command wt "$@"
     fi
 }
+# wt - end
 EOF
 
     echo -e "${GREEN}Shell integration added to $shell_rc${NC}"
@@ -117,10 +137,23 @@ main() {
     local os=$(detect_os)
     local arch=$(detect_arch)
     local version="${VERSION:-$(get_latest_version)}"
+    local current_version=""
+    local is_upgrade=false
+
+    # Check existing installation
+    if command -v "$BINARY_NAME" &> /dev/null; then
+        current_version=$("$BINARY_NAME" version 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' || echo "unknown")
+        is_upgrade=true
+    fi
 
     echo "System:  $os/$arch"
-    echo "Version: $version"
-    echo "Target:  $INSTALL_DIR/$BINARY_NAME"
+    if [ "$is_upgrade" = true ]; then
+        echo -e "Current: ${YELLOW}${current_version}${NC}"
+        echo -e "Target:  ${GREEN}${version}${NC}"
+    else
+        echo "Version: $version"
+    fi
+    echo "Path:    $INSTALL_DIR/$BINARY_NAME"
     echo ""
 
     # Create install directory
@@ -160,7 +193,11 @@ main() {
     mv "$tmp_dir/$BINARY_NAME" "$INSTALL_DIR/"
     chmod +x "$INSTALL_DIR/$BINARY_NAME"
 
-    echo -e "${GREEN}Successfully installed $BINARY_NAME to $INSTALL_DIR${NC}"
+    if [ "$is_upgrade" = true ]; then
+        echo -e "${GREEN}Successfully upgraded $BINARY_NAME${NC}"
+    else
+        echo -e "${GREEN}Successfully installed $BINARY_NAME to $INSTALL_DIR${NC}"
+    fi
 
     # Check PATH
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -187,14 +224,18 @@ main() {
     fi
 
     echo ""
-    echo -e "${GREEN}Installation complete!${NC}"
-    echo ""
-    echo "Quick start:"
-    echo "  cd your-git-repo"
-    echo "  wt init          # Create .wt.json config"
-    echo "  wt add -b feat   # Create worktree with new branch"
-    echo "  wt list          # List all worktrees"
-    echo "  wt select        # Interactive worktree selection"
+    if [ "$is_upgrade" = true ]; then
+        echo -e "${GREEN}Upgrade complete!${NC}"
+    else
+        echo -e "${GREEN}Installation complete!${NC}"
+        echo ""
+        echo "Quick start:"
+        echo "  cd your-git-repo"
+        echo "  wt init          # Create .wt.json config"
+        echo "  wt add -b feat   # Create worktree with new branch"
+        echo "  wt list          # List all worktrees"
+        echo "  wt select        # Interactive worktree selection"
+    fi
 }
 
 main "$@"

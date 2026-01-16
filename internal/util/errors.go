@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"strings"
 )
 
 // ErrorCode represents different error types
@@ -71,4 +72,16 @@ func GitCommandError(cmd string, err error) *WTError {
 		Message: fmt.Sprintf("git command failed: %s", cmd),
 		Cause:   err,
 	}
+}
+
+func GitCommandErrorWithOutput(cmd string, err error, output string) *WTError {
+	output = strings.TrimSpace(output)
+	if output != "" {
+		return &WTError{
+			Code:    ErrGitCommand,
+			Message: fmt.Sprintf("git command failed: %s: %s", cmd, output),
+			Cause:   err,
+		}
+	}
+	return GitCommandError(cmd, err)
 }

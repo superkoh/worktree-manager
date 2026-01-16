@@ -9,7 +9,7 @@ import (
 
 // LinkPaths creates symbolic links from source to destination
 // On Windows, if symlink fails (requires admin/dev mode), it falls back to copy
-func LinkPaths(srcBase, dstBase string, paths []string) error {
+func LinkPaths(srcBase, dstBase string, paths []string, quiet bool) error {
 	for _, p := range paths {
 		src := filepath.Join(srcBase, p)
 		dst := filepath.Join(dstBase, p)
@@ -17,7 +17,9 @@ func LinkPaths(srcBase, dstBase string, paths []string) error {
 		// Check if source exists
 		info, err := os.Stat(src)
 		if os.IsNotExist(err) {
-			fmt.Printf("  skip (not found): %s\n", p)
+			if !quiet {
+				fmt.Printf("  skip (not found): %s\n", p)
+			}
 			continue
 		}
 		if err != nil {
@@ -41,7 +43,9 @@ func LinkPaths(srcBase, dstBase string, paths []string) error {
 			// On Windows, symlink may fail without admin privileges
 			// Fall back to copying
 			if runtime.GOOS == "windows" {
-				fmt.Printf("  symlink failed, falling back to copy: %s\n", p)
+				if !quiet {
+					fmt.Printf("  symlink failed, falling back to copy: %s\n", p)
+				}
 				if info.IsDir() {
 					if err := copyDir(src, dst); err != nil {
 						return fmt.Errorf("failed to copy directory %s: %w", p, err)
@@ -51,12 +55,16 @@ func LinkPaths(srcBase, dstBase string, paths []string) error {
 						return fmt.Errorf("failed to copy file %s: %w", p, err)
 					}
 				}
-				fmt.Printf("  copied (symlink fallback): %s\n", p)
+				if !quiet {
+					fmt.Printf("  copied (symlink fallback): %s\n", p)
+				}
 				continue
 			}
 			return fmt.Errorf("failed to create symlink for %s: %w", p, err)
 		}
-		fmt.Printf("  linked: %s -> %s\n", p, src)
+		if !quiet {
+			fmt.Printf("  linked: %s -> %s\n", p, src)
+		}
 	}
 	return nil
 }

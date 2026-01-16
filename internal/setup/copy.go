@@ -8,7 +8,7 @@ import (
 )
 
 // CopyFiles copies specified paths from source to destination
-func CopyFiles(srcBase, dstBase string, paths []string) error {
+func CopyFiles(srcBase, dstBase string, paths []string, quiet bool) error {
 	for _, p := range paths {
 		src := filepath.Join(srcBase, p)
 		dst := filepath.Join(dstBase, p)
@@ -16,7 +16,9 @@ func CopyFiles(srcBase, dstBase string, paths []string) error {
 		// Check if source exists
 		info, err := os.Stat(src)
 		if os.IsNotExist(err) {
-			fmt.Printf("  skip (not found): %s\n", p)
+			if !quiet {
+				fmt.Printf("  skip (not found): %s\n", p)
+			}
 			continue
 		}
 		if err != nil {
@@ -37,7 +39,9 @@ func CopyFiles(srcBase, dstBase string, paths []string) error {
 				return fmt.Errorf("failed to copy file %s: %w", p, err)
 			}
 		}
-		fmt.Printf("  copied: %s\n", p)
+		if !quiet {
+			fmt.Printf("  copied: %s\n", p)
+		}
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package git
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -58,7 +59,7 @@ func (m *Manager) List() ([]Worktree, error) {
 }
 
 // Add creates a new worktree
-func (m *Manager) Add(path, branch string, createBranch bool) error {
+func (m *Manager) Add(path, branch string, createBranch bool, quiet bool) error {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return err
@@ -82,9 +83,19 @@ func (m *Manager) Add(path, branch string, createBranch bool) error {
 
 	cmd := exec.Command("git", args...)
 	cmd.Dir = m.repo.RootPath
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+
+	var stderrBuf bytes.Buffer
+	if !quiet {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stderr = &stderrBuf
+	}
+
 	if err := cmd.Run(); err != nil {
+		if quiet && stderrBuf.Len() > 0 {
+			return util.GitCommandErrorWithOutput("worktree add", err, stderrBuf.String())
+		}
 		return util.GitCommandError("worktree add", err)
 	}
 

@@ -114,15 +114,17 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Creating worktree at: %s\n", worktreePath)
 	}
 
-	if err := manager.Add(worktreePath, branch, addNewBranch); err != nil {
+	if err := manager.Add(worktreePath, branch, addNewBranch, addPrintPath); err != nil {
 		return err
 	}
 
 	// Run setup (copy/link)
 	if !addNoSetup {
-		if err := setup.RunSetup(cfg, repo.RootPath, worktreePath); err != nil {
+		if err := setup.RunSetup(cfg, repo.RootPath, worktreePath, addPrintPath); err != nil {
 			// Don't fail, just warn
-			fmt.Printf("Warning: setup failed: %v\n", err)
+			if !addPrintPath {
+				fmt.Printf("Warning: setup failed: %v\n", err)
+			}
 		}
 	}
 
