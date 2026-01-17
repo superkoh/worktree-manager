@@ -2,8 +2,10 @@ package cli
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"github.com/superkoh/worktree-manager/internal/config"
 	"github.com/superkoh/worktree-manager/internal/git"
 	"github.com/superkoh/worktree-manager/internal/tui"
 )
@@ -37,12 +39,28 @@ func runRemove(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Load configuration
+	cfg, err := config.Load(repo.RootPath)
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
+
 	manager := git.NewManager(repo)
 
 	var paths []string
 
 	if len(args) > 0 {
-		paths = args
+		// Treat args as branch names and apply naming pattern
+		basedir, err := cfg.GetWorktreeBasedir(repo.RootPath)
+		if err != nil {
+			return fmt.Errorf("failed to get basedir: %w", err)
+		}
+
+		for _, branch := range args {
+			worktreeName := cfg.GenerateWorktreeName(repo.Name, branch)
+			worktreePath := filepath.Join(basedir, worktreeName)
+			paths = append(paths, worktreePath)
+		}
 	} else {
 		// Show TUI to select worktree
 		worktrees, err := manager.List()
